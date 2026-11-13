@@ -6,6 +6,7 @@
 # Integrantes do grupo:
 #   - Aaron Araújo Agapito Guedes
 #   - Kayky Francisco Rodrigues da Rocha
+#   - Gabriel Luiz Fonseca Brandão
 # =============================================================================
 """
 Cliente de chat. Pede um nickname, conecta ao servidor e usa duas linhas de
