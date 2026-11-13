@@ -6,6 +6,7 @@
 # Integrantes do grupo:
 #   - Aaron Araújo Agapito Guedes
 #   - Kayky Francisco Rodrigues da Rocha
+#   - Gabriel Luiz Fonseca Brandão
 # =============================================================================
 """
 Cliente que pede a hora ao servidor e mostra no console.
