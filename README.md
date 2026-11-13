@@ -7,6 +7,7 @@
 **Integrantes:**
 - Aaron Araújo Agapito Guedes
 - Kayky Francisco Rodrigues da Rocha
+- Gabriel Luiz Fonseca Brandão
 
 ## Estrutura do repositório
 
