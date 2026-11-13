@@ -6,6 +6,7 @@
 # Integrantes do grupo:
 #   - Aaron Araújo Agapito Guedes
 #   - Kayky Francisco Rodrigues da Rocha
+#   - Gabriel Luiz Fonseca Brandão
 # =============================================================================
 """
 Cliente TCP: conecta ao servidor, envia várias mensagens digitadas pelo

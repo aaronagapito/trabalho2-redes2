@@ -6,6 +6,7 @@
 # Integrantes do grupo:
 #   - Aaron Araújo Agapito Guedes
 #   - Kayky Francisco Rodrigues da Rocha
+#   - Gabriel Luiz Fonseca Brandão
 # =============================================================================
 """
 Servidor TCP que aceita vários clientes ao mesmo tempo (uma thread por conexão).
