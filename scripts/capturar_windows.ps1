@@ -2,7 +2,7 @@
 # Trabalho 2 - Redes de Computadores 2 - Prof. Alessandro Vivas Andrade
 # Script que gera automaticamente as capturas dos exercicios 5 a 9 (Windows)
 #
-# Integrantes: Aaron Araujo Agapito Guedes / Kayky Francisco Rodrigues da Rocha
+# Integrantes: Aaron Araujo Agapito Guedes / Kayky Francisco Rodrigues da Rocha / Gabriel Luiz Fonseca Brandao
 #
 # Requisito: Wireshark instalado (com o Npcap) em C:\Program Files\Wireshark.
 # Como usar: de dois cliques em CAPTURAR.bat e aceite o pedido de administrador.
