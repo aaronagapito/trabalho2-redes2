@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<!--
+=============================================================================
+Trabalho 2 - Redes de Computadores 2 - Prof. Alessandro Vivas Andrade
+Exercício 10 - Chat em Rede com WebSockets (CLIENTE HTML + JavaScript)
+
+Integrantes do grupo:
+  - Aaron Araújo Agapito Guedes
+  - Kayky Francisco Rodrigues da Rocha
+=============================================================================
+Cliente de navegador que usa a WebSocket API nativa (new WebSocket(...)).
+Basta abrir este arquivo no navegador com o servidor_ws.py rodando.
+-->
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chat WebSocket</title>
+  <style>
+    body { font-family: sans-serif; max-width: 700px; margin: 20px auto; padding: 0 16px; background: #f4f4f4; }
+    h1 { font-size: 1.4em; }
+    .linha { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+    input { padding: 8px; border: 1px solid #aaa; border-radius: 4px; }
+    #texto { flex: 1; }
+    button { padding: 8px 14px; border: none; border-radius: 4px; background: #1f6feb; color: #fff; cursor: pointer; }
+    button:disabled { background: #999; cursor: default; }
+    #mensagens { height: 380px; overflow-y: auto; background: #fff; border: 1px solid #ccc;
+                 border-radius: 4px; padding: 10px; margin-bottom: 10px; }
+    .msg { margin: 4px 0; }
+    .minha { color: #1f6feb; }
+    .sistema { color: #777; font-style: italic; }
+    .erro { color: #c00; font-weight: bold; }
+    #status { font-size: 0.9em; color: #555; }
+  </style>
+</head>
+<body>
+  <h1>Chat WebSocket — Redes de Computadores 2</h1>
+
+  <!-- Dados de conexão -->
+  <div class="linha">
+    <input id="servidor" value="ws://localhost:8765" size="22" title="Endereço do servidor">
+    <input id="nome" placeholder="Seu nome de usuário" maxlength="30">
+    <button id="botaoConectar">Conectar</button>
+    <button id="botaoSair" disabled>Sair</button>
+  </div>
+  <div id="status">Desconectado.</div>
+
+  <!-- Área das mensagens -->
+  <div id="mensagens"></div>
+
+  <!-- Envio -->
+  <div class="linha">
+    <input id="texto" placeholder="Digite uma mensagem e tecle Enter" disabled>
+    <button id="botaoEnviar" disabled>Enviar</button>
+  </div>
+
+  <script>
+    // Referências aos elementos da página
+    const campoServidor = document.getElementById("servidor");
+    const campoNome = document.getElementById("nome");
+    const campoTexto = document.getElementById("texto");
+    const areaMensagens = document.getElementById("mensagens");
+    const status = document.getElementById("status");
+    const botaoConectar = document.getElementById("botaoConectar");
+    const botaoSair = document.getElementById("botaoSair");
+    const botaoEnviar = document.getElementById("botaoEnviar");
+
+    let socket = null;   // conexão WebSocket atual
+    let meuNome = "";
+
+    // Adiciona uma linha na área de mensagens (textContent evita injeção de HTML)
+    function mostrar(texto, classe) {
+      const div = document.createElement("div");
+      div.className = "msg " + (classe || "");
+      div.textContent = texto;
+      areaMensagens.appendChild(div);
+      areaMensagens.scrollTop = areaMensagens.scrollHeight;
+    }
+
+    // Liga/desliga os botões conforme o estado da conexão
+    function conectado(sim) {
+      botaoConectar.disabled = sim;
+      campoNome.disabled = sim;
+      campoServidor.disabled = sim;
+      botaoSair.disabled = !sim;
+      campoTexto.disabled = !sim;
+      botaoEnviar.disabled = !sim;
+      if (sim) campoTexto.focus();
+    }
+
+    function horaAtual() {
+      return new Date().toLocaleTimeString("pt-BR");
+    }
+
+    function conectar() {
+      meuNome = campoNome.value.trim();
+      if (meuNome === "") {
+        alert("Digite um nome de usuário.");
+        return;
+      }
+      status.textContent = "Conectando...";
+
+      try {
+        socket = new WebSocket(campoServidor.value.trim());
+      } catch (erro) {
+        status.textContent = "Endereço inválido: " + erro.message;
+        return;
+      }
+
+      // Conexão aberta: envia a mensagem de entrada com o nome
+      socket.onopen = function () {
+        socket.send(JSON.stringify({ tipo: "entrar", nome: meuNome }));
+        status.textContent = "Conectado como " + meuNome;
+        conectado(true);
+      };
+
+      // Mensagem recebida do servidor
+      socket.onmessage = function (evento) {
+        let dados;
+        try {
+          dados = JSON.parse(evento.data);
+        } catch (e) {
+          mostrar("(mensagem inválida recebida)", "erro");
+          return;
+        }
+        if (dados.tipo === "mensagem") {
+          mostrar("[" + dados.hora + "] " + dados.nome + ": " + dados.texto);
+        } else if (dados.tipo === "erro") {
+          mostrar("Erro: " + dados.texto, "erro");
+        } else {
+          mostrar(dados.texto, "sistema");
+        }
+      };
+
+      socket.onerror = function () {
+        status.textContent = "Erro na conexão. O servidor está ligado?";
+      };
+
+      // Conexão fechada (pelo usuário, pelo servidor ou por falha)
+      socket.onclose = function () {
+        status.textContent = "Desconectado.";
+        conectado(false);
+        socket = null;
+      };
+    }
+
+    function enviar() {
+      const texto = campoTexto.value.trim();
+      if (texto === "" || socket === null || socket.readyState !== WebSocket.OPEN) return;
+      socket.send(JSON.stringify({ tipo: "mensagem", texto: texto }));
+      // O servidor envia só para os outros, então mostramos a nossa aqui
+      mostrar("[" + horaAtual() + "] " + meuNome + " (você): " + texto, "minha");
+      campoTexto.value = "";
+    }
+
+    function sair() {
+      if (socket !== null) socket.close();
+    }
+
+    // Eventos dos botões e da tecla Enter
+    botaoConectar.onclick = conectar;
+    botaoSair.onclick = sair;
+    botaoEnviar.onclick = enviar;
+    campoTexto.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") enviar();
+    });
+    campoNome.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") conectar();
+    });
+  </script>
+</body>
+</html>
